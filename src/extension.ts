@@ -160,9 +160,7 @@ async function getCommandForAction(action: string, content: string): Promise<str
 				},
 			});
 	
-			// Use userInput here
-			console.log(userInput);
-		
+					
             return `cmd /c testfy \n${userInput + content}`;
         case 'Crudify':
             return `cmd /c crudify ${content}`;
