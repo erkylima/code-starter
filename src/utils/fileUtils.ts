@@ -35,7 +35,12 @@ export async function getCommandForAction(
                 throw new Error('Parâmetros obrigatórios ausentes.');
             }
 
-            return await generator.executeGeneration('testfy', content, rootPath, clientId, clientSecret, grantType);
+            try {
+                return await generator.executeGeneration('testfy', content, rootPath, clientId, clientSecret, grantType);
+            } catch (err: any){
+                throw err;
+            }
+             
 
         default:
             throw new Error('Ação desconhecida');

@@ -31,7 +31,7 @@ export class CodeGenerator {
             });
             return response.data;
         } catch (error: any) {
-            throw new Error(`Failed to start execution: ${error.message}`, { cause: error });
+            return `Failed to start execution: ${error.message}`;
         }
     }
 
@@ -56,37 +56,42 @@ export class CodeGenerator {
     }
 
     private async saveFile(rootPath: string, packagePath: string, fileName: string, content: string): Promise<void> {
-        // Define o diretório base como o diretório raiz do projeto
-        const baseDir = path.join(rootPath, 'output');
-    
-        // Constrói o caminho do diretório de saída, substituindo '.' por separadores de diretório
-        const dirPath = path.join(baseDir, packagePath.replace(/\./g, path.sep));
+        try {
+            const baseDir = path.join(rootPath, 'output');
         
-        // Cria o diretório de forma recursiva, caso ele não exista
-        await fs.promises.mkdir(dirPath, { recursive: true });
-        
-        // Constrói o caminho completo do arquivo
-        const pathFIle = path.join(dirPath, fileName);
-        
-        // Escreve o conteúdo no arquivo, criando-o ou sobrescrevendo-o, se já existir
-        await fs.promises.writeFile(pathFIle, content, 'utf8');
+            const dirPath = path.join(baseDir, packagePath.replace(/\./g, path.sep));
+            
+            await fs.promises.mkdir(dirPath, { recursive: true });
+
+            const pathFIle = path.join(dirPath, fileName);
+            
+            await fs.promises.writeFile(pathFIle, content, 'utf8');
+        } catch (error: any) {
+            throw new Error(`Failed to save file: ${error.message}`, { cause: error });
+        }
     }
 
     private async processSteps(rootPath: string, steps: any): Promise<void> {
-        for (const step of steps) {
-            const re = /```java([\s\S]*?)```/g;
-            const matches = step.step_result.answer.matchAll(re);
-            for (const match of matches) {
-                const codeBlock = match[1].trim();
-                const lines = codeBlock.split('\n');
-                const packageLine = lines[0].trim();
-                const content = lines.slice(1).join('\n');
-                if (packageLine.startsWith("package")) {
-                    const packagePath = packageLine.split(' ')[1].replace(';', '');
-                    const fileName = this.extractFileName(content);
-                    await this.saveFile(rootPath, packagePath, fileName, packageLine + '\n' + content);
+        try {
+
+            for (const step of steps) {
+                const re = /```java([\s\S]*?)```/g;
+                const matches = step.step_result.answer.matchAll(re);
+                for (const match of matches) {
+                    const codeBlock = match[1].trim();
+                    const lines = codeBlock.split('\n');
+                    const packageLine = lines[0].trim();
+                    const content = lines.slice(1).join('\n');
+                    if (packageLine.startsWith("package")) {
+                        const packagePath = packageLine.split(' ')[1].replace(';', '');
+                        const fileName = this.extractFileName(content);
+                        await this.saveFile(rootPath, packagePath, fileName, packageLine + '\n' + content);
+                    }
                 }
             }
+        } catch (error: any) {
+            throw new Error(`Error during execution: ${error.message}`, { cause: error });
+
         }
     }
 
@@ -99,9 +104,8 @@ export class CodeGenerator {
             while (true) {
                 try {
                     result = await this.checkStatus(token, executionID);
-                } catch (error) {
-                    console.error('Error checking status:', error);
-                    throw error;
+                } catch (error:any) {
+                    throw new Error(`Error checking status: ${error.message}`, { cause: error });
                 }
                 if (result.progress.status === 'COMPLETED' || result.progress.status === 'FAILURE') {
                     break;
@@ -114,18 +118,16 @@ export class CodeGenerator {
             if (result.progress.status !== 'FAILURE') {
                 try {
                     await this.processSteps(rootPath, result.steps);
-                } catch (error) {
-                    console.error('Error processing steps:', error);
-                    throw error;
+                } catch (error: any) {
+                    throw new Error(`Error processing steps: ${error.message}`, { cause: error });
                 }
                 return 'Files saved successfully!';
             } else {
-                return 'Execution failed!';
+                throw new Error('Execution failed! Token Excedido');
             }
         } catch (error: any) {
-            console.error(`Error during execution: ${error.message}`, { cause: error });
+            throw new Error('Execution failed! Token Excedido');
         }
-        return 'Execution failed!';
     }
 }
 

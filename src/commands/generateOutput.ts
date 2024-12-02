@@ -11,13 +11,13 @@ export async function generateOutputCommand(
 ) {
     const selectedItems = treeView.selection;
 
-    if (selectedItems.length === 0) {
-        vscode.window.showWarningMessage('Nenhum arquivo ou pasta selecionado!');
-        return;
-    }
+    // if (selectedItems.length === 0) {
+    //     vscode.window.showWarningMessage('Nenhum arquivo ou pasta selecionado!');
+    //     return;
+    // }
 
     const action = await vscode.window.showQuickPick(['Testfy', 'Crudify', 'Crufidy Gateway'], {
-        placeHolder: 'Escolha a ação que deseja realizar com os arquivos selecionados',
+        placeHolder: 'Escolha a ação que deseja realizar com os arquivos selecionados', 
     });
 
     if (!action) {
@@ -46,8 +46,8 @@ export async function generateOutputCommand(
                 const content = fs.readFileSync(item.uri.fsPath, 'utf-8');
                 combinedContent += `\n\n--- File: ${path.basename(item.uri.fsPath)} ---\n\n${content}`;
             }
-        } catch (err) {
-            vscode.window.showErrorMessage(`Erro ao processar: ${item.uri.fsPath}`);
+        } catch (err: any) {
+            vscode.window.showErrorMessage(`Erro ao processar: ${item.uri.fsPath}. Motivo: ${err.message}`);
         }
     }
 

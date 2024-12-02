@@ -1,8 +1,10 @@
 {
-  "name": "Code Starter",
-  "displayName": "hypercontext-generator",
+  "name": "CodeStarter",
+  "displayName": "CodeStarter",
   "description": "Gerador de hipercontexto",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "author": "Érky Lima",
+  "publisher": "CodeStarterDev",
   "engines": {
     "vscode": "^1.95.0"
   },
