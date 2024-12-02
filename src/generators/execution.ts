@@ -123,10 +123,10 @@ export class CodeGenerator {
                 }
                 return 'Files saved successfully!';
             } else {
-                throw new Error('Execution failed! Token Excedido');
+                throw new Error('Execution QuickCommand Failed!');
             }
         } catch (error: any) {
-            throw new Error('Execution failed! Token Excedido');
+            throw new Error(`${error.message}`);
         }
     }
 }
