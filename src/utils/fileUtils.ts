@@ -14,7 +14,7 @@ export async function getCommandForAction(
                 prompt: 'Essa informação será usada no processamento do QuickCommand',
                 validateInput: (value) => {
                     if (!value || value.trim() === '') {
-                        return 'A informação não pode estar vazia.';
+                        throw new Error('A informação não pode estar vazia.');
                     }
                     return null;
                 },
@@ -23,7 +23,7 @@ export async function getCommandForAction(
             const secretStorage = context.secrets;
 
             if (!secretStorage) {
-                return 'Sem Secrets Iniciadass';
+                throw new Error('Sem Secrets Iniciadas.');
             }
 
             const clientId = await secretStorage.get('clientId');

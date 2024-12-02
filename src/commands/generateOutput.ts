@@ -51,6 +51,10 @@ export async function generateOutputCommand(
         }
     }
 
-    const result = await getCommandForAction(action, rootPath, combinedContent, context);
-    vscode.window.showInformationMessage(`Comando executado com sucesso: ${result}`);
+    try {
+        const result = await getCommandForAction(action, rootPath, combinedContent, context);
+        vscode.window.showInformationMessage(`Comando executado com sucesso: ${result}`);
+    } catch (err: any) {
+        vscode.window.showErrorMessage(err.message);
+    }
 }
