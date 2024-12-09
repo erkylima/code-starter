@@ -1,13 +1,13 @@
-import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Event, EventEmitter, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri, window } from 'vscode';
+import { readdirSync, statSync } from 'fs';
+import { join } from 'path';
 import { FileItem } from '../models/fileItem';
 
-export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem> {
-    private _onDidChangeTreeData: vscode.EventEmitter<FileItem | undefined | void> = new vscode.EventEmitter<
+export class FileExplorerProvider implements TreeDataProvider<FileItem> {
+    private _onDidChangeTreeData: EventEmitter<FileItem | undefined | void> = new EventEmitter<
         FileItem | undefined | void
     >();
-    readonly onDidChangeTreeData: vscode.Event<FileItem | undefined | void> = this._onDidChangeTreeData.event;
+    readonly onDidChangeTreeData: Event<FileItem | undefined | void> = this._onDidChangeTreeData.event;
 
     constructor(private workspaceRoot: string) {}
 
@@ -15,13 +15,13 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem> {
         this._onDidChangeTreeData.fire();
     }
 
-    getTreeItem(element: FileItem): vscode.TreeItem {
+    getTreeItem(element: FileItem): TreeItem {
         return element;
     }
 
     async getChildren(element?: FileItem): Promise<FileItem[]> {
         if (!this.workspaceRoot) {
-            vscode.window.showInformationMessage('Nenhum workspace encontrado');
+            window.showInformationMessage('Nenhum workspace encontrado');
             return [];
         }
 
@@ -29,19 +29,19 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem> {
         const files = await this.readDirectory(dirPath);
 
         return files.map((file) => {
-            const filePath = path.join(dirPath, file.name);
+            const filePath = join(dirPath, file.name);
             const collapsibleState = file.isDirectory
-                ? vscode.TreeItemCollapsibleState.Collapsed
-                : vscode.TreeItemCollapsibleState.None;
+                ? TreeItemCollapsibleState.Collapsed
+                : TreeItemCollapsibleState.None;
 
-            return new FileItem(vscode.Uri.file(filePath), collapsibleState);
+            return new FileItem(Uri.file(filePath), collapsibleState);
         });
     }
 
     private async readDirectory(dir: string): Promise<{ name: string; isDirectory: boolean }[]> {
-        const items = fs.readdirSync(dir).map((name) => {
-            const filePath = path.join(dir, name);
-            return { name, isDirectory: fs.statSync(filePath).isDirectory() };
+        const items = readdirSync(dir).map((name) => {
+            const filePath = join(dir, name);
+            return { name, isDirectory: statSync(filePath).isDirectory() };
         });
 
         return items.sort((a, b) => {

@@ -1,12 +1,12 @@
-import * as vscode from 'vscode';
+import { ExtensionContext, Uri, WebviewPanel, window, ViewColumn } from 'vscode';
 
 export class SecretsPanel {
   public static currentPanel: SecretsPanel | undefined;
-  private readonly _panel: vscode.WebviewPanel;
-  private readonly _extensionUri: vscode.Uri;
-  private readonly _context: vscode.ExtensionContext;
+  private readonly _panel: WebviewPanel;
+  private readonly _extensionUri: Uri;
+  private readonly _context: ExtensionContext;
 
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
+  private constructor(panel: WebviewPanel, extensionUri: Uri, context: ExtensionContext) {
     this._panel = panel;
     this._extensionUri = extensionUri;
     this._context = context;
@@ -15,17 +15,16 @@ export class SecretsPanel {
     this._loadSecretsToWebview();
 
     this._panel.onDidDispose(() => this.dispose(), null, context.subscriptions);
-
   }
 
-  public static createOrShow(context: vscode.ExtensionContext) {
+  public static createOrShow(context: ExtensionContext) {
     if (SecretsPanel.currentPanel) {
       SecretsPanel.currentPanel._panel.reveal();
     } else {
-      const panel = vscode.window.createWebviewPanel(
+      const panel = window.createWebviewPanel(
         'secretsPanel',
         'API Secrets Manager',
-        vscode.ViewColumn.One,
+        ViewColumn.One,
         { enableScripts: true }
       );
       SecretsPanel.currentPanel = new SecretsPanel(panel, context.extensionUri, context);
@@ -40,17 +39,18 @@ export class SecretsPanel {
         const clientId = await secretStorage.get('clientId');
         const clientSecret = await secretStorage.get('clientSecret');
         const grantType = await secretStorage.get('grantType');
+        const tenant = await secretStorage.get('tenant');
 
         // Envia os valores para o Webview
         this._panel.webview.postMessage({
           command: 'loadSecrets',
-          data: { clientId, clientSecret, grantType }
+          data: { clientId, clientSecret, grantType, tenant }
         });
       } else {
-        vscode.window.showErrorMessage('Erro ao acessar o armazenamento seguro.');
+        window.showErrorMessage('Erro ao acessar o armazenamento seguro.');
       }
     } catch (error: any) {
-      vscode.window.showErrorMessage(`Erro ao carregar secrets: ${error.message}`);
+      window.showErrorMessage(`Erro ao carregar secrets: ${error.message}`);
     }
   }
 
@@ -71,7 +71,9 @@ export class SecretsPanel {
           <label for="clientSecret">Client Secret:</label><br>
           <input type="password" id="clientSecret" name="clientSecret"><br><br>
           <label for="grantType">Grant Type:</label><br>
-          <input type="text" id="grantType" name="grantType"><br><br>
+          <input type="text" id="grantType" name="grantType"><br>
+          <label for="tenant">Tenant:</label><br>
+          <input type="text" id="tenant" name="tenant"><br><br>
           <button type="submit">Save</button>
         </form>
         <script>
@@ -84,6 +86,7 @@ export class SecretsPanel {
               document.getElementById('clientId').value = message.data.clientId || '';
               document.getElementById('clientSecret').value = message.data.clientSecret || '';
               document.getElementById('grantType').value = message.data.grantType || '';
+              document.getElementById('tenant').value = message.data.tenant || '';
             }
           });
 
@@ -92,9 +95,11 @@ export class SecretsPanel {
             const clientId = document.getElementById('clientId').value;
             const clientSecret = document.getElementById('clientSecret').value;
             const grantType = document.getElementById('grantType').value;
+            const tenant = document.getElementById('tenant').value;
+
             vscode.postMessage({
               command: 'saveSecrets',
-              data: { clientId, clientSecret, grantType }
+              data: { clientId, clientSecret, grantType, tenant }
             });
           });
         </script>
@@ -109,7 +114,7 @@ export class SecretsPanel {
         switch (message.command) {
           case 'saveSecrets':
             await this._saveSecretsToStorage(message.data);
-            vscode.window.showInformationMessage('Secrets saved securely!');
+            window.showInformationMessage('Secrets saved securely!');
             break;
         }
       },
@@ -125,21 +130,22 @@ export class SecretsPanel {
     this._panel.dispose();
   }
 
-  private async _saveSecretsToStorage(data: { clientId: string; clientSecret: string; grantType: string }) {
+  private async _saveSecretsToStorage(data: { clientId: string; clientSecret: string; grantType: string, tenant: string }) {
     try {
-        const secretStorage = this._context.secrets;
+      const secretStorage = this._context.secrets;
 
-        if (secretStorage) {
-            await secretStorage.store('clientId', data.clientId);
-            await secretStorage.store('clientSecret', data.clientSecret);
-            await secretStorage.store('grantType', data.grantType);
+      if (secretStorage) {
+        await secretStorage.store('clientId', data.clientId);
+        await secretStorage.store('clientSecret', data.clientSecret);
+        await secretStorage.store('grantType', data.grantType);
+        await secretStorage.store('tenant', data.tenant);
 
-            vscode.window.showInformationMessage('Secrets salvos com segurança!');
-        } else {
-            vscode.window.showErrorMessage('Erro ao acessar o armazenamento seguro.');
-        }
+        window.showInformationMessage('Secrets salvos com segurança!');
+      } else {
+        window.showErrorMessage('Erro ao acessar o armazenamento seguro.');
+      }
     } catch (error: any) {
-        vscode.window.showErrorMessage(`Erro ao salvar secrets: ${error.message}`);
+      window.showErrorMessage(`Erro ao salvar secrets: ${error.message}`);
     }
   }
 }

@@ -1,15 +1,15 @@
 import { CodeGenerator } from '../generators/execution';
-import * as vscode from 'vscode';
+import { ExtensionContext, window } from 'vscode';
 
 export async function getCommandForAction(
     action: string,
     rootPath: string,
     content: string,
-    context: vscode.ExtensionContext
+    context: ExtensionContext
 ): Promise<string> {
     switch (action) {
         case 'Testfy':
-            const userInput = await vscode.window.showInputBox({
+            const userInput = await window.showInputBox({
                 placeHolder: 'Quais camadas da aplicação você quer gerar testes?',
                 prompt: 'Essa informação será usada no processamento do QuickCommand',
                 validateInput: (value) => {
@@ -29,14 +29,15 @@ export async function getCommandForAction(
             const clientId = await secretStorage.get('clientId');
             const clientSecret = await secretStorage.get('clientSecret');
             const grantType = await secretStorage.get('grantType');
+            const tenant = await secretStorage.get('tenant');
             const generator = new CodeGenerator();
 
-            if (!clientId || !clientSecret || !grantType) {
+            if (!clientId || !clientSecret || !grantType || !tenant) {
                 throw new Error('Parâmetros obrigatórios ausentes.');
             }
 
             try {
-                return await generator.executeGeneration('testfy', content, rootPath, clientId, clientSecret, grantType);
+                return await generator.executeGeneration('testfy', content, rootPath, clientId, clientSecret, grantType, tenant);
             } catch (err: any){
                 throw err;
             }

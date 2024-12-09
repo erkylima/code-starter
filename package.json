@@ -6,7 +6,7 @@
   "author": "Érky Lima",
   "publisher": "CodeStarterDev",
   "engines": {
-    "vscode": "^1.95.0"
+    "vscode": "^1.80.0"
   },
   "contributes": {
     "viewsContainers": {
@@ -46,14 +46,13 @@
           "command": "fileExplorer.generateOutput",
           "when": "view == codeStarterExplorer",
           "group": "navigation",
-          "icon": "$(gear)" 
+          "icon": "$(gear)"
         },
         {
           "command": "secretsManager.openSecretsPanel",
           "when": "view == codeStarterExplorer",
           "group": "navigation"
-        }
-        ,
+        },
         {
           "command": "fileExplorer.refresh",
           "when": "view == codeStarterExplorer",
@@ -84,7 +83,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.9",
     "@types/node": "20.x",
-    "@types/vscode": "^1.95.0",
+    "@types/vscode": "^1.80.0",
     "@typescript-eslint/eslint-plugin": "^8.10.0",
     "@typescript-eslint/parser": "^8.7.0",
     "@vscode/test-cli": "^0.0.10",
@@ -96,6 +95,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "axios": "^1.7.8"
+    "axios": "^1.7.8",
+    "https-proxy-agent": "^7.0.6"
   }
 }

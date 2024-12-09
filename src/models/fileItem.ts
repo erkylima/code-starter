@@ -1,19 +1,19 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
+import { Command, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from 'vscode';
+import { basename } from 'path';
 
-export class FileItem extends vscode.TreeItem {
+export class FileItem extends TreeItem {
     constructor(
-        public readonly uri: vscode.Uri,
-        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        public readonly command?: vscode.Command
+        public readonly uri: Uri,
+        public readonly collapsibleState: TreeItemCollapsibleState,
+        public readonly command?: Command
     ) {
-        super(path.basename(uri.fsPath), collapsibleState);
+        super(basename(uri.fsPath), collapsibleState);
         this.tooltip = uri.fsPath;
         this.description = undefined;
-        if (collapsibleState === vscode.TreeItemCollapsibleState.None) {
-            this.iconPath = new vscode.ThemeIcon("file"); // Ícone para arquivos
+        if (collapsibleState === TreeItemCollapsibleState.None) {
+            this.iconPath = new ThemeIcon("file"); // Ícone para arquivos
         } else {
-            this.iconPath = new vscode.ThemeIcon("folder"); // Ícone para diretórios
+            this.iconPath = new ThemeIcon("folder"); // Ícone para diretórios
         }
     }
 }
