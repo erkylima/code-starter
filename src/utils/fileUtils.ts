@@ -57,7 +57,7 @@ export async function getCommandForAction(
             
 
             try {
-                return await generator.executeGeneration('crudify-3', "gere crud com  a seguinte DDL " + crudifyInput + content ? "use o seguinte conteudo para mergear: " +content : '', rootPath+path.sep+"testfy", clientId, clientSecret, grantType, tenant);
+                return await generator.executeGeneration('crudify-3', "gere crud com  a seguinte DDL " + crudifyInput + content ? "use o seguinte conteudo para mergear: " +content : '', rootPath+path.sep+"crudify", clientId, clientSecret, grantType, tenant);
             } catch (err: any){
                 throw err;
             }
